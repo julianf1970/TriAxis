@@ -614,9 +614,72 @@ body {
   background: rgba(56, 161, 105, 0.12);
   color: var(--green);
   font-weight: 500;
+  border-radius: 9999px;
 }
 
 body {
   background: #f7f5f2;
+}
+
+/* ─── PHASE 4 HEATMAP REDESIGN (2026-05-13 afternoon) ──────────────
+   Replaces the single-bar 'competency-shaped' rendering with a journey-row
+   layout: baseline value, directional arrow, current value, summary phrase.
+   Removes the visual encoding ambiguity (bar fullness reads as competency,
+   not change). Polarity is handled upstream so arrow colour and summary
+   language are always improvement-positive regardless of whether the metric
+   is 'more is better' or 'less is better'.
+*/
+.heatmap-journey {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.journey-track {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.journey-baseline {
+  color: var(--gray-500);
+  font-weight: 400;
+}
+
+.journey-arrow {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.journey-arrow-improve {
+  color: var(--green);
+}
+
+.journey-arrow-regress {
+  color: var(--red-muted);
+}
+
+.journey-current {
+  color: var(--gray-800);
+  font-weight: 600;
+}
+
+.journey-summary {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.journey-summary-improve {
+  color: var(--green);
+}
+
+.journey-summary-regress {
+  color: var(--red-muted);
 }
 

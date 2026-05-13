@@ -170,25 +170,37 @@ const LearnerDashboard = {
         let pctChange = ((vals.latest - vals.baseline) / Math.abs(vals.baseline)) * 100;
         if (lowerIsBetter) pctChange = -pctChange; // Invert so positive = improvement
 
-        skills.push({ name, pctChange: Math.round(pctChange), program: enr.program_name });
+        skills.push({
+          name,
+          baseline: vals.baseline,
+          latest: vals.latest,
+          unit: vals.unit,
+          pctChange: Math.round(pctChange),
+          program: enr.program_name,
+        });
       });
     });
 
     if (!skills.length) return '<div class="empty-state">No skill data available</div>';
 
-    // Sort by improvement
+    // Sort by improvement (best at top)
     skills.sort((a, b) => b.pctChange - a.pctChange);
 
     return `<div class="heatmap">
       ${skills.map(s => {
-        const color = s.pctChange >= 0 ? 'var(--green)' : 'var(--red-muted)';
-        const width = Math.min(Math.max(Math.abs(s.pctChange), 5), 100);
+        const isImprove = s.pctChange >= 0;
+        const dirClass = isImprove ? 'improve' : 'regress';
+        const summary = TriAxisCharts.summaryPhrase(s.unit, s.pctChange, s.name);
         return `
           <div class="heatmap-row">
             <div class="heatmap-label" title="${s.program}">${TriAxisCharts.formatMetricName(s.name)}</div>
-            <div class="heatmap-bar-wrapper">
-              <div class="heatmap-bar" style="width: ${width}%; background: ${color};"></div>
-              <div class="heatmap-value" style="color: ${color};">${s.pctChange > 0 ? '+' : ''}${s.pctChange}%</div>
+            <div class="heatmap-journey">
+              <div class="journey-track">
+                <span class="journey-baseline">${TriAxisCharts.formatMetricValue(s.baseline, s.unit)}</span>
+                <span class="journey-arrow journey-arrow-${dirClass}">→</span>
+                <span class="journey-current">${TriAxisCharts.formatMetricValue(s.latest, s.unit)}</span>
+              </div>
+              <span class="journey-summary journey-summary-${dirClass}">${summary}</span>
             </div>
           </div>
         `;

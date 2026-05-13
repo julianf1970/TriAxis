@@ -137,9 +137,67 @@ const TriAxisCharts = {
     });
   },
 
+  // Metric label overrides — maps raw metric_name to a display label
+  // and an optional summary style. 'neutral' opts out of unit-specific phrasing
+  // (e.g. '40% faster') in favour of generic 'improvement'/'decline' language,
+  // appropriate when the label has been reframed away from the underlying unit.
+  metricLabelOverrides: {
+    formatting_errors: { display: 'Formatting Consistency', summaryStyle: 'neutral' },
+  },
+
   // Format metric name for display
   formatMetricName(name) {
+    const override = this.metricLabelOverrides[name];
+    if (override && override.display) return override.display;
     return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  },
+
+  // Format a metric value with its unit in a compact, scannable form.
+  // Used in the heatmap journey row to display baseline and current values.
+  formatMetricValue(value, unit) {
+    if (value === null || value === undefined) return '—';
+    switch (unit) {
+      case 'percentage':         return Math.round(value) + '%';
+      case 'minutes':            return Math.round(value) + ' mins';
+      case 'seconds':            return Math.round(value) + ' sec';
+      case 'hours':              return value.toFixed(1) + ' hrs';
+      case 'minutes_per_entry':  return value.toFixed(1) + ' min/entry';
+      case 'times_per_day':      return value.toFixed(1) + '/day';
+      case 'count_per_doc':      return value.toFixed(1) + '/doc';
+      case 'rating_1to10':       return value.toFixed(1) + '/10';
+      default:                   return Math.round(value).toString();
+    }
+  },
+
+  // Return a positively-framed summary phrase for a (unit, pctChange) pair.
+  // pctChange is polarity-corrected upstream: positive = improvement regardless of
+  // whether the underlying metric is 'more is better' or 'less is better'.
+  // metric_name is consulted to allow overrides (e.g. 'neutral' style for renamed metrics).
+  summaryPhrase(unit, pctChange, metric_name = null) {
+    const abs = Math.abs(pctChange);
+    const isImprove = pctChange >= 0;
+
+    if (abs < 3) return 'no meaningful change';
+
+    // Large-multiplier improvements get plain-English phrasing
+    if (isImprove && abs >= 200) return 'more than tripled';
+    if (isImprove && abs >= 100) return 'more than doubled';
+
+    // If the metric has been renamed away from its unit (e.g. errors → Consistency),
+    // use neutral improvement/decline language instead of unit-specific phrasing.
+    const override = metric_name && this.metricLabelOverrides[metric_name];
+    if (override && override.summaryStyle === 'neutral') {
+      return isImprove ? abs + '% improvement' : abs + '% decline';
+    }
+
+    const timeUnits = ['minutes', 'seconds', 'hours', 'minutes_per_entry'];
+    const countUnits = ['count_per_doc'];
+    const freqUnits = ['times_per_day'];
+
+    if (timeUnits.includes(unit))  return isImprove ? abs + '% faster'      : abs + '% slower';
+    if (countUnits.includes(unit)) return isImprove ? abs + '% reduction'   : abs + '% more';
+    if (freqUnits.includes(unit))  return isImprove ? abs + '% more often'  : abs + '% less often';
+    return                                  isImprove ? abs + '% gain'         : abs + '% decline';
   },
 
   // Status color helper
