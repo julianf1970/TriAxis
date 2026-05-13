@@ -683,3 +683,14 @@ body {
   color: var(--red-muted);
 }
 
+/* Badge padding bump — makes the pill curve visually pronounced. The base
+   .badge had padding 2px 8px which produced a ~17px tall badge; at that
+   height border-radius >=10px already renders maximally rounded ends, so
+   raising border-radius did nothing. More vertical padding gives the curve
+   room to show. Applies to all badge variants (green, blue, red) for
+   visual consistency across the dashboard.
+*/
+.badge {
+  padding: 4px 12px;
+}
+

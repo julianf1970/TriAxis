@@ -147,7 +147,7 @@ const LearnerDashboard = {
         <div class="ranking-position ${r.rank <= 3 ? 'top-3' : ''}">#${r.rank}</div>
         <div class="ranking-info">
           <div class="ranking-metric">${TriAxisCharts.formatMetricName(r.metric_name)}</div>
-          <div class="ranking-detail">${r.program_name} &middot; ${r.metric_value} ${r.metric_unit || ''} &middot; ${r.rank} of ${r.total}</div>
+          <div class="ranking-detail">${r.program_name} &middot; ${TriAxisCharts.formatMetricValue(r.metric_value, r.metric_unit)} &middot; ${r.rank} of ${r.total}</div>
         </div>
       </div>
     `).join('');
