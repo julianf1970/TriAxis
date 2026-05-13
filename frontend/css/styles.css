@@ -16,6 +16,7 @@
   --amber: #d69e2e;
   --amber-bg: #fefcbf;
   --red: #e53e3e;
+  --red-muted: #c53030;
   --red-bg: #fff5f5;
   --white: #ffffff;
   --gray-50: #f9fafb;
@@ -600,3 +601,22 @@ body {
   .stats-row { grid-template-columns: 1fr; }
   .dashboard-container { padding: 16px; }
 }
+
+/* ─── PHASE 4 MICRO-IMPROVEMENTS (2026-05-13) ─────────────────
+   Muted positive badge — quiet confirmation, not celebration.
+   Warm off-white page background — modest premium read without
+   fighting the cool navy palette.
+   Heatmap negative-change rendering — sign-based binary; uses
+   --red-muted (defined in :root above) and is driven from
+   learner.js renderHeatmap.
+*/
+.badge-green {
+  background: rgba(56, 161, 105, 0.12);
+  color: var(--green);
+  font-weight: 500;
+}
+
+body {
+  background: #f7f5f2;
+}
+

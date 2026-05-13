@@ -181,7 +181,7 @@ const LearnerDashboard = {
 
     return `<div class="heatmap">
       ${skills.map(s => {
-        const color = s.pctChange >= 20 ? 'var(--green)' : s.pctChange >= 5 ? 'var(--amber)' : 'var(--red)';
+        const color = s.pctChange >= 0 ? 'var(--green)' : 'var(--red-muted)';
         const width = Math.min(Math.max(Math.abs(s.pctChange), 5), 100);
         return `
           <div class="heatmap-row">
