@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Internal strategy and IP-protected material — NEVER commit
+Explanation documents/
+Launch_Roadmap.html
+
+# Claude Code session data
+.claude/
+
+# SQLite working files — only the main .db should be committed
+backend/database.db-shm
+backend/database.db-wal
+
+# Editor / OS / accidental files
+.DS_Store
+Thumbs.db
+nul
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (none currently, but future-proofing)
+.env
+.env.local
+.env.*.local
+
+# Build / dist (none currently, but future-proofing)
+dist/
+build/

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TriAxis | Learning Analytics</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <span class="brand-icon">&#9651;</span>
+      <span class="brand-text">TriAxis</span>
+      <span class="brand-sub">Learning Analytics</span>
+    </div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" data-dashboard="learner">Learner</a>
+      <a href="#" class="nav-link" data-dashboard="manager">Manager</a>
+      <a href="#" class="nav-link" data-dashboard="lnd">L&amp;D</a>
+      <a href="#" class="nav-link" data-dashboard="leadership">Leadership</a>
+    </div>
+    <div class="nav-user">
+      <select id="user-select" class="user-select">
+        <option value="">Loading users...</option>
+      </select>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main id="dashboard-container" class="dashboard-container">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading dashboard...</p>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="/js/api-client.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/dashboards/learner.js"></script>
+  <script src="/js/dashboards/manager.js"></script>
+  <script src="/js/dashboards/lnd.js"></script>
+  <script src="/js/dashboards/leadership.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
