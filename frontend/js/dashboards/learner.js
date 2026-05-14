@@ -1,6 +1,6 @@
 /**
  * Learner Dashboard
- * Individual view: progress charts, cohort ranking, skill heatmap, confidence trajectory
+ * Individual view: progress charts, cohort ranking, skill progression, confidence trajectory
  */
 const LearnerDashboard = {
   async render(container, userId) {
@@ -42,7 +42,7 @@ const LearnerDashboard = {
           <div class="card-body">${this.renderCohortRankings(cohortRankings)}</div>
         </div>
         <div class="card">
-          <div class="card-header"><h2>Skill Heatmap</h2></div>
+          <div class="card-header"><h2>Skill Progression</h2></div>
           <div class="card-body">${this.renderHeatmap(enrollments, skillProgress)}</div>
         </div>
       </div>
