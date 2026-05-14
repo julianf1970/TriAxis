@@ -197,6 +197,36 @@ const learnerProfiles = {
 
 const profileMultiplier = { strong: 1.2, average: 1.0, weak: 0.6 };
 
+// ─── REGRESSION OVERRIDES ───────────────────────────────────
+// Per-(user_id, program_id, metric_name) override on the final value (for completed
+// enrollments) or the last checkpoint value (for dropped enrollments).
+// Specified as a multiplier of the baseline value. A multiplier of 0.88 means
+// the final/latest value is 88% of baseline (12% regression for higher-is-better
+// metrics like percentage accuracy). For lower-is-better metrics (time, errors),
+// a multiplier > 1.0 represents regression (e.g. 1.25 = 25% worse).
+//
+// These overrides are the ONLY source of regression in the demo data.
+// All other learners and metrics follow the standard improveRange logic.
+// The demo includes deliberate regression so that the heatmap's negative-change
+// rendering can be demonstrated honestly.
+const regressionOverrides = {
+  // Hannah Morgan (id 9, weak profile, new paralegal): regressed on
+  // copilot_prompt_accuracy in Copilot Fundamentals. Story: she tried
+  // Copilot prompts early, got poor results, gradually stopped engaging
+  // with the suggestion mechanism, and her prompt quality slipped below
+  // where she started. Programme completed in attendance terms; capability
+  // outcome was negative. Applies to FINAL value.
+  '9-1-copilot_prompt_accuracy': 0.88,  // higher is better -> 12% below baseline
+
+  // Emily Thornton (id 5, weak profile, dropped Doc Automation halfway):
+  // regressed on formatting_errors. Story: half-learned a new workflow,
+  // dropped before consolidating, ended up making MORE errors than at
+  // baseline because she'd disrupted her old habits without forming new
+  // ones. Status is 'dropped' so this applies to the LAST CHECKPOINT.
+  // (Renamed in the UI to 'Formatting Consistency' with neutral phrasing.)
+  '5-4-formatting_errors': 1.25,  // lower is better -> 25% worse than baseline
+};
+
 const insertSkill = db.prepare(`
   INSERT INTO skill_measurements (enrollment_id, measurement_type, measurement_date, metric_name, metric_value, metric_unit)
   VALUES (@enrollment_id, @measurement_type, @measurement_date, @metric_name, @metric_value, @metric_unit)
@@ -267,6 +297,13 @@ const seedAll = db.transaction(() => {
       const totalImprove = randomBetween(metric.improveRange[0], metric.improveRange[1]) * mult;
 
       // Checkpoints
+      // Look up any regression override for this (user, program, metric) tuple.
+      // Declared once here so both the checkpoint loop and the final-value block
+      // below can use it without redeclaring.
+      const overrideKey = `${plan.user_id}-${plan.program_id}-${metric.name}`;
+      const checkpointOverride = (status === 'dropped' && regressionOverrides[overrideKey] !== undefined)
+        ? regressionOverrides[overrideKey]
+        : null;
       for (let c = 1; c <= checkpoints; c++) {
         const fraction = c / (checkpoints + 1);
         // Learning curve: fast early, slower later
@@ -274,19 +311,30 @@ const seedAll = db.transaction(() => {
         const currentImprove = totalImprove * curveFraction + randomBetween(-2, 2);
         const cpDate = dateOffset(startDate, Math.round(durationDays * fraction));
 
+        // For dropped enrollments with a regression override, the LAST checkpoint
+        // (c === checkpoints) becomes the regression value, because there will be
+        // no 'final' measurement. Earlier checkpoints still follow the normal curve
+        // so the trajectory shows the learner starting reasonably and slipping.
+        const value = (checkpointOverride !== null && c === checkpoints)
+          ? baseValue * checkpointOverride + randomBetween(-0.5, 0.5)
+          : baseValue + currentImprove;
+
         insertSkill.run({
           enrollment_id: enrollmentId,
           measurement_type: 'checkpoint',
           measurement_date: cpDate,
           metric_name: metric.name,
-          metric_value: Math.round((baseValue + currentImprove) * 100) / 100,
+          metric_value: Math.round(value * 100) / 100,
           metric_unit: metric.unit,
         });
       }
 
       // Final measurement (if completed)
       if (status === 'completed') {
-        const finalValue = baseValue + totalImprove + randomBetween(-1, 1);
+        const override = regressionOverrides[overrideKey];
+        const finalValue = override !== undefined
+          ? baseValue * override + randomBetween(-0.5, 0.5)
+          : baseValue + totalImprove + randomBetween(-1, 1);
         insertSkill.run({
           enrollment_id: enrollmentId,
           measurement_type: 'final',
